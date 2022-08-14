@@ -1,0 +1,235 @@
+<aside class="notes">
+  <p> Hello everyone! Probably many of you have heard about such things as bitcoin, ethereum, mining or even
+    NFT
+    ;) Behind all these concepts lies a technology called Blockchain. In this presentation, I tried to
+    understand myself and, as far as possible, tell you what Blockchain is. This is a huge topic, and I can't
+    tell all the nuances. And since we are developers here, let's look at Blockchain like as a data structure.
+  </p>
+</aside>
+
+<aside class="notes">
+  <p>
+    Let's start with the Hash Function component. Hash functions are commonly used to check the integrity of
+    files or store passwords. Password hashing is used to securely store user data.
+  </p>
+</aside>
+
+<aside class="notes">
+  <p>
+    The hash function converts the input information into a bit string of a certain size.
+    This string is called a hash.
+
+    A cryptographic hash function must fulfill the following set of criteria
+    to be viable for use in a blockchain:
+  </p>
+</aside>
+
+<aside class="notes">
+  <p>
+    One-wayness - It has to be easy to calculate an output from a given input but impossible to calculate
+    the input from a given output.
+  </p>
+</aside>
+
+<aside class="notes">
+  <p>
+    Pseudorandom - A change in the input must result in an unforeseeable change of the output.
+  </p>
+</aside>
+
+<aside class="notes">
+  <p>
+    Collision-resistant
+    It should be nearly impossible to find two inputs to a hash function producing the same output.
+  </p>
+</aside>
+
+<aside class="notes">
+  <p>
+    Deterministic - A given input always needs to produce the same output
+  </p>
+</aside>
+
+<aside class="notes">
+  <p>
+    I think at this point that's enough about the hash function
+    Now consider the blockchain itself
+  </p>
+</aside>
+
+<aside class="notes">
+  <p>
+    Each block contains several elements
+    The elements of a block are generally
+    separated into the block header and its transactions.
+    While the transactions in a block account for most of the data,
+    the block header contains essential
+    metadata about each block, such as a timestamp and hash of the previous block
+  </p>
+</aside>
+
+<aside class="notes">
+  <p>
+    Now let's chain our blocks.
+    Looks a lot like a linked list, doesn't it?
+    The key difference between a blockchain and a linked list is that
+    each reference in a blockchain is cryptographically secured,
+    and therefore tamper-evident.
+    In contrast, the pointers in a linked list can be changed at any time without affecting the integrity of
+    the data. The secured references establish order throughout the blocks and effectively make the
+    blockchain an append-only data structure where new data can only be added with new blocks. This means
+    you can only add data to a blockchain by appending it to the front.
+    The hash value of the previous block is included in the following block header because
+    the block hash depends on the data of a block, even changing a single character in one of the
+    transactions would invalidate the reference.
+  </p>
+</aside>
+
+<aside class="notes">
+  <p>
+    The secured links are constantly checked for validity.
+    If you were to insert a malicious block in the
+    middle of a blockchain or change data in an existing block,
+    for example, between Blocks 1 and 3 in the
+    graphic, you could include a reference to its predecessor,
+    Block 1. Still, it would be infeasible
+    to make Block 3 reference your newly inserted block.
+
+    Each new block built on top of an existing block is commonly known as a confirmation. The older a block
+    gets, the more confirmations it will have. Each confirmation makes tampering with the data in a block
+    more difficult because you have to recreate additional valid references.
+  </p>
+</aside>
+
+<aside class="notes">
+  <p>
+    Okay, that was a boring theoretical part, now let's try to describe it all in code
+  </p>
+</aside>
+
+<aside class="notes">
+  <p>
+    First, let's see what a block might look like.
+    We have a block number.
+    Block creation time.
+    List of transactions.
+    And the hash of the previous block.
+  </p>
+</aside>
+
+<aside class="notes">
+  <p>
+    We can easily describe its structure like this
+  </p>
+</aside>
+
+<aside class="notes">
+  <p>
+    Now let's write our blockchain class.
+    We will have an array of transactions to add to the new block.
+    And the array of blocks.
+
+    In the constructor, we will create a base or genesis block
+
+    We will also have several methods.
+    We'll take a closer look at them next.
+
+  </p>
+</aside>
+
+<aside class="notes">
+  <p>
+    Let's start simple.
+
+    This function just takes some data to
+    transactions and adds them to the array of transactions for the new block
+    Moving on
+  </p>
+</aside>
+
+<aside class="notes">
+  <p>
+    A function to calculate the hash of a block.
+
+    The good news is that we don't have to write our own Hash Function,
+    For the calculation, we will use a ready-made function from the Crypto library.
+
+    Here we are passing a block to the method.
+    We bring the block to the string and calculate the hash of this string according
+    to the SHA algorithm
+    Next
+  </p>
+</aside>
+
+<aside class="notes">
+  <p>
+    This function simply returns the last block in our chain.
+    Nothing remarkable
+  </p>
+</aside>
+
+<aside class="notes">
+  <p>
+    Here we form a new block.
+    Set the index, set the block creation time,
+    and ongoing transactions.
+
+    Also here we calculate the hash of the previous block,
+    and if it is not there, we generate a hash of some arbitrary string
+  </p>
+</aside>
+
+<aside class="notes">
+  <p>
+    The last function traverses the block chain and checks
+    whether the hash of any of them has changed.
+    If at some stage the hash has changed, then the whole chain is considered
+    not valid
+  </p>
+</aside>
+
+<aside class="notes">
+  <p>
+    Now let's see how it all works.
+    Let's create an instance of the blockchain class.
+    Let's add two blocks with transactions.
+    And check the validity
+  </p>
+</aside>
+
+<aside class="notes">
+  <p>
+    As we can see: we have three blocks with transactions
+    And the test passed
+    But what if someone changes one of our blocks...
+  </p>
+</aside>
+
+<aside class="notes">
+  <p>
+    Let's imagine that
+    Someone changed the data in one of the blocks.
+    Let's see if validation passes now.
+  </p>
+</aside>
+
+<aside class="notes">
+  <p>
+    We see that the data in the second block has been changed.
+    But the chain no longer passes validation.
+    And the scam failed!
+  </p>
+</aside>
+
+<aside class="notes">
+  <p>
+    Well, now you know what the basic structure of the blockchain is and you can try to write your own
+    implementation by adding other components, such as "proof of work" mechanism and interaction with other
+    nodes.
+    And that's all for now.
+    Links to presentation and repository with code
+    you will find under the video.
+    Thanks for watching!
+    Bye-Bye!
+  </p>
+</aside>
