@@ -4,7 +4,6 @@ type Block = {
   index: number
   timestamp: number
   transactions: Transaction[]
-  proof: number
   prevHash: string
 }
 
@@ -20,69 +19,53 @@ class Blockchain {
   chain: Block[] = []
 
   constructor() {
-    // Create the genesis block
-    this.addBlock(100)
+    this.addBlock()
   }
 
-  addBlock(proof: number, prevHash: string = '') {
+  addBlock(): void {
     const block: Block = {
       index: this.chain.length + 1,
       timestamp: Date.now(),
       transactions: this.currentTransactions,
-      proof: proof,
-      prevHash: prevHash ?? Blockchain.hash(this.lastBlock)
+      prevHash: this.hash(this.lastBlock ?? 'Genesis Block')
     }
 
-    // reset current transactions
-    this.currentTransactions = []
-
     this.chain.push(block)
-    return block
-
+    this.currentTransactions = []
   }
 
-  addTransaction(sender: string, recipient: string, amount: number) {
-    this.currentTransactions.push(
-      {
-        sender,
-        recipient,
-        amount,
-      }
-    )
-
-    return this.lastBlock.index + 1
+  addTransaction(
+    sender: string,
+    recipient: string,
+    amount: number
+  ): void {
+    this.currentTransactions.push({ sender, recipient, amount, })
   }
 
   get lastBlock(): Block {
-    return this.chain[ this.chain.length - 1 ];
+    return this.chain[this.chain.length - 1];
   }
 
-  proofOfWork(lastProof: number): number {
-    let proof = 0;
-    while (!Blockchain.validProof(lastProof, proof)) {
-      proof++
-    }
-    return proof
-  }
-
-  static hash(block: Block): string {
+  hash(block: Block): string {
     const blockString = JSON.stringify(block)
     return createHash('sha256').update(blockString).digest('hex')
   }
 
-  static validProof(lastProof: number, proof: number): boolean {
-    const guess = `${lastProof * proof}`
-    const guessHash = createHash('sha256').update(guess).digest('hex')
-    console.log('Guess: ', guess, 'Guess Hash: ', guessHash)
+  get isValid(): boolean {
+    for (let i = 1; i < this.chain.length; i++) {
+      const block = this.chain[i]
+      const prevBlock = this.chain[i - 1]
 
-    return guessHash.slice(0, 4) === '0000'
+      if (block.prevHash !== this.hash(prevBlock))
+        return false
+    }
+    return true
   }
-
 }
 
 
 
-const block: Block = {
+const block = {
   index: 1,
   timestamp: 1660389388102,
   transactions: [
@@ -92,17 +75,21 @@ const block: Block = {
       amount: 5,
     }
   ],
-  proof: 324984774000,
   prevHash: "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824"
 }
 
 const blockchain = new Blockchain()
 blockchain.addTransaction('Corvin', 'Blaze', 5)
-blockchain.addTransaction('Jara', 'Corvin', 2)
-blockchain.addTransaction('Blaze', 'Merlin', 2)
-console.log(blockchain.currentTransactions)
-console.log(blockchain.chain)
-blockchain.addBlock(101)
-console.log(blockchain.chain)
-console.log(blockchain.currentTransactions)
+blockchain.addBlock()
+blockchain.addTransaction('Random', 'Corvin', 2)
+blockchain.addTransaction('Julian', 'Eric', 3)
+blockchain.addBlock()
+
+blockchain.chain[1].transactions.push(
+  { sender: 'Merlin', recipient: 'Dara', amount: 100 }
+)
+
+console.log(...blockchain.chain)
+console.log('\nIs blockchain valid: ', blockchain.isValid)
+
 
